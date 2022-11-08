@@ -13,13 +13,12 @@ class WillowWifi {
 
   WillowWifi._internal();
 
-  late WillowHubInteractor hubInteractor;
   late WillowHubWifiManager willowHubWifiManager;
   late WillowHubMQTTManager willowHubMQTTManager;
 
   /// init function initializes hub interactor, hub wifi manager and hubMqtt manager
   void init(FlutterReactiveBle ble) {
-    hubInteractor = WillowHubInteractor(ble);
+    final hubInteractor = WillowHubInteractor(ble);
     willowHubWifiManager = WillowHubWifiManager(ble, hubInteractor);
     willowHubMQTTManager = WillowHubMQTTManager(hubInteractor);
   }
