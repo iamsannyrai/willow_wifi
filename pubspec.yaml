@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_reactive_ble: ^5.0.2
+  mqtt_client: ^9.6.8
   protobuf: ^2.1.0
   willow_ble:
     git:
