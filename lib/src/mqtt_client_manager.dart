@@ -58,6 +58,7 @@ class MQTTClientManager {
     context.useCertificateChainBytes(deviceCert.buffer.asUint8List());
     mqttServerClient.securityContext = context;
     mqttServerClient.secure = true;
+    //TODO  remove later
     // for testing, always return true
     mqttServerClient.onBadCertificate = (Object? e) => true;
     mqttServerClient.setProtocolV311();
