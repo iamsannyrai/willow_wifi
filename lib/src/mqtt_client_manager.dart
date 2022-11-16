@@ -92,8 +92,8 @@ class MQTTClientManager {
     mqttServerClient.subscribe(topic, qosLevel);
   }
 
-  /// method to publish message in a [topic]
-  /// [message] can be be either string or Map or List<Map>
+  /// method to publish message in a [topic],
+  /// [message] can be be either string or Map or List<Map>,
   /// string is for command and Map or List<Map> is for data
   void publishMessage(
     String topic,
