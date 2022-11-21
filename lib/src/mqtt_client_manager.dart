@@ -20,12 +20,19 @@ class MQTTClientManager {
 
   MQTTClientManager._internal();
 
-  factory MQTTClientManager({
+  factory MQTTClientManager() => _inst;
+
+  /// must be called before connect, disconnect, subscribe or publish
+  Future<void> initialize({
     required String serverEndPoint,
     required String clientIdentifier,
+    required String crtFilePath,
     int port = 443,
     String? customAuthorizerName,
-  }) {
+    Function()? onConnected,
+    Function()? onDisconnected,
+    Function(String? topic)? onSubscribed,
+  }) async {
     _inst.serverEndpoint = serverEndPoint;
     _inst.clientIdentifier = clientIdentifier;
     _inst.port = port;
@@ -36,37 +43,27 @@ class MQTTClientManager {
     );
     _inst.customAuthorizerName = customAuthorizerName;
 
-    return _inst;
-  }
-
-  /// must be called before connect, disconnect, subscribe or publish
-  Future<void> initializeWithCertificate({
-    required String crtFilePath,
-    Function()? onConnected,
-    Function()? onDisconnected,
-    Function(String? topic)? onSubscribed,
-  }) async {
-    mqttServerClient.logging(on: true);
-    mqttServerClient.keepAlivePeriod = 60;
-    mqttServerClient.onConnected = onConnected;
-    mqttServerClient.onDisconnected = onDisconnected;
-    mqttServerClient.onSubscribed = onSubscribed;
+    _inst.mqttServerClient.logging(on: true);
+    _inst.mqttServerClient.keepAlivePeriod = 60;
+    _inst.mqttServerClient.onConnected = onConnected;
+    _inst.mqttServerClient.onDisconnected = onDisconnected;
+    _inst.mqttServerClient.onSubscribed = onSubscribed;
 
     ByteData deviceCert = await rootBundle.load(crtFilePath);
     final context = SecurityContext.defaultContext;
     if (customAuthorizerName != null) context.setAlpnProtocols(["mqtt"], false);
     context.useCertificateChainBytes(deviceCert.buffer.asUint8List());
-    mqttServerClient.securityContext = context;
-    mqttServerClient.secure = true;
+    _inst.mqttServerClient.securityContext = context;
+    _inst.mqttServerClient.secure = true;
     //TODO  remove later
     // for testing, always return true
-    mqttServerClient.onBadCertificate = (Object? e) => true;
-    mqttServerClient.setProtocolV311();
+    _inst.mqttServerClient.onBadCertificate = (Object? e) => true;
+    _inst.mqttServerClient.setProtocolV311();
 
     final connMessage = MqttConnectMessage()
         .withClientIdentifier(clientIdentifier)
         .startClean();
-    mqttServerClient.connectionMessage = connMessage;
+    _inst.mqttServerClient.connectionMessage = connMessage;
   }
 
   Future<void> connectToBroker(
@@ -80,16 +77,16 @@ class MQTTClientManager {
         userName = username;
       }
 
-      await mqttServerClient.connect(userName, password);
+      await _inst.mqttServerClient.connect(userName, password);
     }
   }
 
   void disconnectWithBroker() {
-    mqttServerClient.disconnect();
+    _inst.mqttServerClient.disconnect();
   }
 
   void subscribeTopic(String topic, [MqttQos qosLevel = MqttQos.exactlyOnce]) {
-    mqttServerClient.subscribe(topic, qosLevel);
+    _inst.mqttServerClient.subscribe(topic, qosLevel);
   }
 
   /// method to publish message in a [topic],
@@ -106,6 +103,6 @@ class MQTTClientManager {
     } else {
       builder.addString(message);
     }
-    mqttServerClient.publishMessage(topic, qosLevel, builder.payload!);
+    _inst.mqttServerClient.publishMessage(topic, qosLevel, builder.payload!);
   }
 }
