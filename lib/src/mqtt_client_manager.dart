@@ -97,9 +97,11 @@ class MQTTClientManager {
     dynamic message, [
     MqttQos qosLevel = MqttQos.exactlyOnce,
   ]) {
+    assert(message is String || message is List<int>,
+        "message must be either String or List<int>");
     final builder = MqttClientPayloadBuilder();
-    if (message is Map || message is List<Map>) {
-      builder.addString(jsonEncode(message));
+    if (message is List<int>) {
+      message.forEach(builder.addByte);
     } else {
       builder.addString(message);
     }
